@@ -1,0 +1,7 @@
+services:
+  api:
+    restart: always
+    image: mikhailomk/my-flask-app:latest
+    container_name: my_app
+    ports:
+      - 7777:7777

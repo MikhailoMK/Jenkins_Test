@@ -1,0 +1,74 @@
+---
+- name: CD # Выполнять всё будем на хосте с именем Prod с правами суперпользователя (root), также отключаем автоматический сбор фактов
+  hosts: ec2_hosts
+  gather_facts: no
+  become: true
+  vars:
+    user: ubuntu
+    home: /home/ubuntu/final_git # Папка, в которую загрузим docker-compose.yml
+    docker_repo: https://download.docker.com/linux/ubuntu
+    docker_gpg_key: https://download.docker.com/linux/ubuntu/gpg
+
+  tasks:
+    - name: Install required system packages # Устанавливаем необходимые зависимости
+      apt:
+        pkg:
+          - apt-transport-https
+          - ca-certificates
+          - curl
+          - software-properties-common
+          - python3-pip
+          - virtualenv
+          - python3-setuptools
+          - python3-docker
+        state: latest
+
+    - name: Add Docker GPG apt Key # Добавляем GPG ключ, чтобы система доверяла пакетам загружаемым из докера
+      apt_key:
+        url: "{{ docker_gpg_key }}"
+        state: present
+
+    - name: Add Docker Repository # Добавляем репозиторий в систему
+      apt_repository:
+        repo: "deb {{ docker_repo }} focal stable"
+        state: present
+
+    - name: Update apt and install docker-ce # Пакеты для работы с докером
+      apt:
+        pkg:
+          - docker-ce
+          - docker-compose
+        state: latest
+
+    - name: Create directory # Создаём папку для docker-compose.yml
+      file:
+        path: "{{ home }}/"
+        state: directory
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: 0775
+
+    - name: Copy docker-compose.yml # Копируем docker-compose.yml
+      copy:
+        src: "docker-compose.yml"
+        dest: "{{ home }}/docker-compose.yml"
+        owner: "{{ user }}"
+        group: "{{ user }}"
+        mode: 0644
+
+    - name: Stop services # Останавливаем сервисы
+      community.docker.docker_compose_v2:
+        project_src: "{{ home }}"
+        state: absent
+
+    - name: Pull images # Обновляем образы
+      community.docker.docker_compose_v2:
+        project_src: "{{ home }}"
+        state: present
+        pull: always
+
+    - name: Start services # Запускаем сервисы
+      community.docker.docker_compose_v2:
+        project_src: "{{ home }}"
+        state: present
+        recreate: always
