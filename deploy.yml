@@ -1,13 +1,13 @@
 ---
-- name: CD # Выполнять всё будем на хосте с именем Prod с правами суперпользователя (root), также отключаем автоматический сбор фактов
-  hosts: ec2_hosts
-  gather_facts: no
-  become: true
-  vars:
-    user: ubuntu
-    home: /home/ubuntu/final_git # Папка, в которую загрузим docker-compose.yml
-    docker_repo: https://download.docker.com/linux/ubuntu
-    docker_gpg_key: https://download.docker.com/linux/ubuntu/gpg
+  - name: CD # Выполнять всё будем на хосте с именем Prod с правами суперпользователя (root), также отключаем автомат>
+    hosts: docker_servers
+    gather_facts: no
+    become: true
+    vars:
+      user: ubuntu
+      home: /home/ubuntu/jenkins_git # Папка, в которую загрузим docker-compose.yml
+      docker_repo: https://download.docker.com/linux/ubuntu
+      docker_gpg_key: https://download.docker.com/linux/ubuntu/gpg
 
   tasks:
     - name: Install required system packages # Устанавливаем необходимые зависимости
