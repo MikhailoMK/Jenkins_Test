@@ -21,24 +21,24 @@ pipeline {
         }
         stage('Build docker image') {
             steps {
-                sh 'docker build -t ${DOCKER_IMAGE_NAME}:latest .'
-                sh 'docker build -t ${DOCKER_IMAGE_NAME}:${VERSION_TAG} .'
+                sh "docker build -t $DOCKER_IMAGE_NAME:latest ."
+                sh "docker build -t $DOCKER_IMAGE_NAME:$VERSION_TAG ."
             }
         }
         stage('Push docker image to DockerHub') {
             steps{
-                withDockerRegistry(credentialsId: dockerhub-cred-mikhailomk) {
+                withDockerRegistry(credentialsId: 'dockerhub-cred-mikhailomk', url: 'https://index.docker.io/v1/') {
                     sh '''
-                        docker push ${DOCKER_IMAGE_NAME}:latest
-                        docker push ${DOCKER_IMAGE_NAME}:${VERSION_TAG}
+                        docker push $DOCKER_IMAGE_NAME:latest
+                        docker push $DOCKER_IMAGE_NAME:$VERSION_TAG
                     '''
                 }
             }
         }
         stage('Delete docker image locally') {
             steps {
-                sh 'docker rmi ${DOCKER_IMAGE_NAME}:${VERSION_TAG}'
-                sh 'docker rmi ${DOCKER_IMAGE_NAME}:latest'
+                sh "docker rmi $DOCKER_IMAGE_NAME:$VERSION_TAG"
+                sh "docker rmi $DOCKER_IMAGE_NAME:latest"
             }
         }
         stage('Ansible') {
