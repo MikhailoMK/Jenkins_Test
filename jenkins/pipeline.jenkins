@@ -22,8 +22,8 @@ pipeline {
         stage('Build docker image') {
             steps {
                 sh '''
-                    docker build --no-cache -t $DOCKER_IMAGE_NAME:v2.0.$VERSION_TAG .
-                    docker build --no-cache -t $DOCKER_IMAGE_NAME:latest .
+                    docker build -t $DOCKER_IMAGE_NAME:v2.0.$VERSION_TAG .
+                    docker build -t $DOCKER_IMAGE_NAME:latest .
                 '''
             }
         }
